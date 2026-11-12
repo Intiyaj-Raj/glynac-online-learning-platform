@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { LearningProvider, useLearning } from "./context/LearningContext";
 import { Navbar } from "./components/Navbar";
+import { CatalogView } from "./components/CatalogView";
 import { Quiz } from "./types";
 import { BookOpen, ShieldCheck, Heart, Sparkles, Terminal } from "lucide-react";
 
@@ -56,32 +57,30 @@ function MainApp() {
       {/* Main View Switcher */}
       <main className="flex-1">
         {currentView === "catalog" && (
-          <div className="max-w-3xl mx-auto p-16 text-center text-slate-400">
-            🚧 Catalog view
-          </div>
+          <CatalogView onSelectCourse={handleSelectCourse} />
         )}
 
         {currentView === "course-detail" && (
           <div className="max-w-3xl mx-auto p-16 text-center text-slate-400">
-            🚧 Course detail view
+            🚧 Course detail view — Day 6 mein banega
           </div>
         )}
 
         {currentView === "player" && (
           <div className="max-w-3xl mx-auto p-16 text-center text-slate-400">
-            🚧 Lesson player
+            🚧 Lesson player — Day 7 mein banega
           </div>
         )}
 
         {currentView === "dashboard" && (
           <div className="max-w-3xl mx-auto p-16 text-center text-slate-400">
-            🚧 Dashboard view
+            🚧 Dashboard view — Day 11 mein banega
           </div>
         )}
 
         {currentView === "certificate" && (
           <div className="max-w-3xl mx-auto p-16 text-center text-slate-400">
-            🚧 Certificate view
+            🚧 Certificate view — Day 12 mein banega
           </div>
         )}
       </main>
