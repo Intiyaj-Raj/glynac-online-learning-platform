@@ -1,36 +1,36 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { 
-  Play, 
-  Pause, 
-  Volume2, 
-  VolumeX, 
-  Maximize, 
-  Minimize, 
-  RotateCcw, 
-  RotateCw, 
-  Subtitles, 
-  Settings, 
-  CheckCircle2, 
-  ArrowLeft, 
-  ChevronRight, 
-  ChevronLeft, 
-  Clock, 
-  BookOpen, 
-  Bookmark, 
-  FileText, 
-  Download, 
-  Trash2, 
-  Edit3, 
-  HelpCircle, 
-  ListOrdered, 
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import {
+  Play,
+  Pause,
+  Volume2,
+  VolumeX,
+  Maximize,
+  Minimize,
+  RotateCcw,
+  RotateCw,
+  Subtitles,
+  Settings,
+  CheckCircle2,
+  ArrowLeft,
+  ChevronRight,
+  ChevronLeft,
+  Clock,
+  BookOpen,
+  Bookmark,
+  FileText,
+  Download,
+  Trash2,
+  Edit3,
+  HelpCircle,
+  ListOrdered,
   Search,
   Keyboard,
   ExternalLink,
   Sparkles,
-  Monitor
-} from 'lucide-react';
-import { Course, Lesson, Quiz, UserNote, TranscriptLine } from '../types';
-import { useLearning } from '../context/LearningContext';
+  Monitor,
+} from "lucide-react";
+import { Course, Lesson, Quiz, UserNote, TranscriptLine } from "../types";
+import { useLearning } from "../context/LearningContext";
 
 interface PlayerViewProps {
   onBackToCourse: () => void;
@@ -39,18 +39,18 @@ interface PlayerViewProps {
 
 export const PlayerView: React.FC<PlayerViewProps> = ({
   onBackToCourse,
-  onOpenQuiz
+  onOpenQuiz,
 }) => {
-  const { 
-    activeCourse, 
-    activeLesson, 
-    userProgress, 
-    navigateToLesson, 
-    markLessonComplete, 
-    updateWatchTime, 
-    addNote, 
-    deleteNote, 
-    getCourseProgress 
+  const {
+    activeCourse,
+    activeLesson,
+    userProgress,
+    navigateToLesson,
+    markLessonComplete,
+    updateWatchTime,
+    addNote,
+    deleteNote,
+    getCourseProgress,
   } = useLearning();
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -60,7 +60,9 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
   // Player State
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState<number>(0);
-  const [duration, setDuration] = useState<number>(activeLesson?.duration || 480);
+  const [duration, setDuration] = useState<number>(
+    activeLesson?.duration || 480,
+  );
   const [volume, setVolume] = useState<number>(0.9);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [playbackRate, setPlaybackRate] = useState<number>(1);
@@ -75,26 +77,28 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
   const [videoError, setVideoError] = useState<boolean>(false);
 
   // Classroom Sidebar Tabs: 'transcript' | 'notes' | 'syllabus' | 'resources'
-  const [activeTab, setActiveTab] = useState<'transcript' | 'notes' | 'syllabus' | 'resources'>('transcript');
+  const [activeTab, setActiveTab] = useState<
+    "transcript" | "notes" | "syllabus" | "resources"
+  >("transcript");
 
   // Notes state
-  const [newNoteText, setNewNoteText] = useState('');
+  const [newNoteText, setNewNoteText] = useState("");
   const [autoScrollTranscript, setAutoScrollTranscript] = useState(true);
-  const [transcriptSearch, setTranscriptSearch] = useState('');
+  const [transcriptSearch, setTranscriptSearch] = useState("");
 
   // Auto-hide controls timeout
   const controlsTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Format seconds to mm:ss or hh:mm:ss
   const formatTime = (secs: number) => {
-    if (isNaN(secs) || secs < 0) return '00:00';
+    if (isNaN(secs) || secs < 0) return "00:00";
     const h = Math.floor(secs / 3600);
     const m = Math.floor((secs % 3600) / 60);
     const s = Math.floor(secs % 60);
     if (h > 0) {
-      return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+      return `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
     }
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
   };
 
   // Resume position logic
@@ -119,7 +123,12 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
       if (videoRef.current && isPlaying) {
         const time = videoRef.current.currentTime;
         setCurrentTime(time);
-        updateWatchTime(activeLesson.id, time, activeLesson.duration, activeCourse.id);
+        updateWatchTime(
+          activeLesson.id,
+          time,
+          activeLesson.duration,
+          activeCourse.id,
+        );
       }
     }, 2000);
     return () => clearInterval(interval);
@@ -129,23 +138,64 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
   const togglePlay = useCallback(() => {
     if (!videoRef.current) return;
     if (videoRef.current.paused || videoRef.current.ended) {
-      videoRef.current.play().then(() => {
-        setIsPlaying(true);
-      }).catch(err => {
-        console.warn('Playback prevented', err);
-        // Fallback simulated playback if media blocked
-        setIsPlaying(true);
-      });
+      videoRef.current
+        .play()
+        .then(() => {
+          setIsPlaying(true);
+        })
+        .catch((err) => {
+          console.warn("Playback prevented", err);
+          // Fallback simulated playback if media blocked
+          setIsPlaying(true);
+        });
     } else {
       videoRef.current.pause();
       setIsPlaying(false);
     }
   }, []);
 
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Don't trigger if user is typing in textarea or input
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA") return;
+
+      if (e.code === "Space") {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.code === "KeyK") {
+        e.preventDefault();
+        togglePlay();
+      } else if (e.code === "KeyM") {
+        e.preventDefault();
+        setIsMuted((prev) => !prev);
+      } else if (e.code === "KeyF") {
+        e.preventDefault();
+        handleToggleFullscreen();
+      } else if (e.code === "KeyJ" || e.code === "ArrowLeft") {
+        e.preventDefault();
+        seekRelative(-10);
+      } else if (e.code === "KeyL" || e.code === "ArrowRight") {
+        e.preventDefault();
+        seekRelative(10);
+      } else if (e.code === "KeyC") {
+        e.preventDefault();
+        setShowCaptions((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [togglePlay]);
+
   // Seek relative
   const seekRelative = (delta: number) => {
     if (!videoRef.current) return;
-    const newTime = Math.max(0, Math.min(duration, videoRef.current.currentTime + delta));
+    const newTime = Math.max(
+      0,
+      Math.min(duration, videoRef.current.currentTime + delta),
+    );
     videoRef.current.currentTime = newTime;
     setCurrentTime(newTime);
   };
@@ -166,9 +216,15 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
   const handleToggleFullscreen = () => {
     if (!containerRef.current) return;
     if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().then(() => setIsFullscreen(true)).catch(() => {});
+      containerRef.current
+        .requestFullscreen()
+        .then(() => setIsFullscreen(true))
+        .catch(() => {});
     } else {
-      document.exitFullscreen().then(() => setIsFullscreen(false)).catch(() => {});
+      document
+        .exitFullscreen()
+        .then(() => setIsFullscreen(false))
+        .catch(() => {});
     }
   };
 
@@ -186,15 +242,22 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
 
   // Active transcript line detection
   const activeTranscriptLine = activeLesson?.transcript.find(
-    line => currentTime >= line.start && currentTime <= line.end
+    (line) => currentTime >= line.start && currentTime <= line.end,
   );
 
   // Auto-scroll transcript container
   useEffect(() => {
-    if (!autoScrollTranscript || !transcriptContainerRef.current || !activeTranscriptLine) return;
-    const el = document.getElementById(`transcript-line-${activeTranscriptLine.id}`);
+    if (
+      !autoScrollTranscript ||
+      !transcriptContainerRef.current ||
+      !activeTranscriptLine
+    )
+      return;
+    const el = document.getElementById(
+      `transcript-line-${activeTranscriptLine.id}`,
+    );
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [activeTranscriptLine?.id, autoScrollTranscript]);
 
@@ -203,7 +266,31 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
     e.preventDefault();
     if (!newNoteText.trim() || !activeCourse || !activeLesson) return;
     addNote(activeCourse.id, activeLesson.id, currentTime, newNoteText);
-    setNewNoteText('');
+    setNewNoteText("");
+  };
+
+  // Export Notes
+  const handleExportNotes = () => {
+    if (!activeCourse || !activeLesson) return;
+    const lessonNotes = userProgress.notes.filter(
+      (n) => n.lessonId === activeLesson.id,
+    );
+    if (lessonNotes.length === 0) {
+      alert("No notes taken for this lesson yet.");
+      return;
+    }
+
+    const header = `# Notes: ${activeLesson.title}\nCourse: ${activeCourse.title}\nExported: ${new Date().toLocaleDateString()}\n\n`;
+    const body = lessonNotes
+      .map((n) => `[${n.formattedTime}] ${n.content}`)
+      .join("\n\n");
+    const blob = new Blob([header + body], { type: "text/markdown" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${activeLesson.title.slice(0, 30)}-notes.md`;
+    a.click();
+    URL.revokeObjectURL(url);
   };
 
   if (!activeCourse || !activeLesson) {
@@ -224,23 +311,29 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
 
   // Next and Previous Lessons in Course
   const allLessons: Lesson[] = [];
-  activeCourse.modules.forEach(m => m.lessons.forEach(l => allLessons.push(l)));
-  const currentIdx = allLessons.findIndex(l => l.id === activeLesson.id);
+  activeCourse.modules.forEach((m) =>
+    m.lessons.forEach((l) => allLessons.push(l)),
+  );
+  const currentIdx = allLessons.findIndex((l) => l.id === activeLesson.id);
   const prevLesson = currentIdx > 0 ? allLessons[currentIdx - 1] : null;
-  const nextLesson = currentIdx < allLessons.length - 1 ? allLessons[currentIdx + 1] : null;
+  const nextLesson =
+    currentIdx < allLessons.length - 1 ? allLessons[currentIdx + 1] : null;
 
   // Filtered transcript search
-  const filteredTranscript = activeLesson.transcript.filter(t => 
-    t.text.toLowerCase().includes(transcriptSearch.toLowerCase()) ||
-    (t.speaker && t.speaker.toLowerCase().includes(transcriptSearch.toLowerCase()))
+  const filteredTranscript = activeLesson.transcript.filter(
+    (t) =>
+      t.text.toLowerCase().includes(transcriptSearch.toLowerCase()) ||
+      (t.speaker &&
+        t.speaker.toLowerCase().includes(transcriptSearch.toLowerCase())),
   );
 
-  const lessonNotes = userProgress.notes.filter(n => n.lessonId === activeLesson.id);
+  const lessonNotes = userProgress.notes.filter(
+    (n) => n.lessonId === activeLesson.id,
+  );
   const isLessonCompleted = !!userProgress.completedLessons[activeLesson.id];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      
       {/* Top Classroom Bar */}
       <div className="border-b border-slate-800 bg-slate-900/90 px-4 py-3 flex items-center justify-between gap-4 sticky top-16 z-30 backdrop-blur-md">
         <div className="flex items-center gap-3 min-w-0">
@@ -274,43 +367,65 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
             onClick={() => markLessonComplete(activeCourse.id, activeLesson.id)}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
               isLessonCompleted
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+                ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                : "bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700"
             }`}
           >
             <CheckCircle2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">{isLessonCompleted ? 'Completed' : 'Mark Complete'}</span>
+            <span className="hidden sm:inline">
+              {isLessonCompleted ? "Completed" : "Mark Complete"}
+            </span>
           </button>
 
           {/* Prev/Next buttons */}
           <div className="flex items-center gap-1">
             <button
               disabled={!prevLesson}
-              onClick={() => prevLesson && navigateToLesson(activeCourse.id, prevLesson.id)}
+              onClick={() =>
+                prevLesson && navigateToLesson(activeCourse.id, prevLesson.id)
+              }
               className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:pointer-events-none"
-              title={prevLesson ? `Previous: ${prevLesson.title}` : 'No previous lesson'}
+              title={
+                prevLesson
+                  ? `Previous: ${prevLesson.title}`
+                  : "No previous lesson"
+              }
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               disabled={!nextLesson}
-              onClick={() => nextLesson && navigateToLesson(activeCourse.id, nextLesson.id)}
+              onClick={() =>
+                nextLesson && navigateToLesson(activeCourse.id, nextLesson.id)
+              }
               className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 disabled:opacity-30 disabled:pointer-events-none"
-              title={nextLesson ? `Next: ${nextLesson.title}` : 'No next lesson'}
+              title={
+                nextLesson ? `Next: ${nextLesson.title}` : "No next lesson"
+              }
             >
               <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
+          {/* Keyboard shortcuts trigger */}
+          <button
+            onClick={() => setShowShortcutsModal(true)}
+            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white hidden md:block"
+            title="Keyboard Shortcuts"
+          >
+            <Keyboard className="w-4 h-4" />
+          </button>
         </div>
       </div>
 
       {/* Main Workspace: Video on Left (or full if theater), Tabs on Right */}
-      <div className={`flex-1 grid ${isTheater ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-12'} gap-0 overflow-hidden`}>
-        
+      <div
+        className={`flex-1 grid ${isTheater ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-12"} gap-0 overflow-hidden`}
+      >
         {/* Left Side: Video Player Container */}
-        <div className={`${isTheater ? 'lg:col-span-12' : 'lg:col-span-8'} flex flex-col bg-slate-950 border-r border-slate-800`}>
-          
+        <div
+          className={`${isTheater ? "lg:col-span-12" : "lg:col-span-8"} flex flex-col bg-slate-950 border-r border-slate-800`}
+        >
           {/* Custom Video Wrapper */}
           <div
             ref={containerRef}
@@ -325,12 +440,16 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
               playsInline
               crossOrigin="anonymous"
               onTimeUpdate={() => {
-                if (videoRef.current) setCurrentTime(videoRef.current.currentTime);
+                if (videoRef.current)
+                  setCurrentTime(videoRef.current.currentTime);
               }}
               onLoadedMetadata={() => {
                 if (videoRef.current) {
-                  setDuration(videoRef.current.duration || activeLesson.duration);
-                  const saved = userProgress.lessonWatchTime[activeLesson.id] || 0;
+                  setDuration(
+                    videoRef.current.duration || activeLesson.duration,
+                  );
+                  const saved =
+                    userProgress.lessonWatchTime[activeLesson.id] || 0;
                   if (saved > 0 && saved < videoRef.current.duration - 5) {
                     videoRef.current.currentTime = saved;
                   }
@@ -341,7 +460,9 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                 markLessonComplete(activeCourse.id, activeLesson.id);
               }}
               onError={() => {
-                console.warn('Video source error, switching to interactive simulated video stream fallback');
+                console.warn(
+                  "Video source error, switching to interactive simulated video stream fallback",
+                );
                 setVideoError(true);
               }}
               onClick={togglePlay}
@@ -350,7 +471,7 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
 
             {/* Video Fallback / Procedural Tech Stream if external MP4 fails or is blocked */}
             {videoError && (
-              <div 
+              <div
                 onClick={togglePlay}
                 className="absolute inset-0 bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 flex flex-col items-center justify-center p-6 text-center cursor-pointer select-none"
               >
@@ -362,9 +483,12 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                     <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 animate-ping" />
                   )}
                 </div>
-                <h3 className="text-base font-bold text-white mb-1">{activeLesson.title}</h3>
+                <h3 className="text-base font-bold text-white mb-1">
+                  {activeLesson.title}
+                </h3>
                 <p className="text-xs text-indigo-300 max-w-md mb-3">
-                  Interactive simulated stream active. Transcripts, timestamps, and note synchronization are 100% operational.
+                  Interactive simulated stream active. Transcripts, timestamps,
+                  and note synchronization are 100% operational.
                 </p>
                 <div className="flex items-center gap-2 text-xs font-mono text-slate-400 bg-slate-900/80 px-3 py-1 rounded-md border border-slate-800">
                   <span>{formatTime(currentTime)}</span>
@@ -374,9 +498,18 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
               </div>
             )}
 
+            {/* Subtitles Overlay */}
+            {showCaptions && activeTranscriptLine && (
+              <div className="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 max-w-[85%] text-center pointer-events-none transition-all">
+                <span className="inline-block px-3.5 py-1.5 rounded-lg bg-black/85 backdrop-blur-md text-white font-medium text-xs sm:text-sm md:text-base border border-slate-700/60 shadow-2xl leading-relaxed">
+                  {activeTranscriptLine.text}
+                </span>
+              </div>
+            )}
+
             {/* Big Center Play/Pause Ripple Button on pause */}
             {!isPlaying && (
-              <div 
+              <div
                 onClick={togglePlay}
                 className="absolute inset-0 flex items-center justify-center bg-black/40 z-10 cursor-pointer backdrop-blur-[2px]"
               >
@@ -387,23 +520,32 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
             )}
 
             {/* Custom Bottom Controls Overlay */}
-            <div className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent p-4 z-20 transition-opacity duration-300 ${
-              showControls || !isPlaying ? 'opacity-100' : 'opacity-0 pointer-events-none'
-            }`}>
-              
+            <div
+              className={`absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent p-4 z-20 transition-opacity duration-300 ${
+                showControls || !isPlaying
+                  ? "opacity-100"
+                  : "opacity-0 pointer-events-none"
+              }`}
+            >
               {/* Scrub / Progress Bar */}
-              <div 
+              <div
                 className="relative group/scrub h-3 flex items-center cursor-pointer mb-2"
                 onMouseMove={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
-                  const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                  const pos = Math.max(
+                    0,
+                    Math.min(1, (e.clientX - rect.left) / rect.width),
+                  );
                   setHoverSeekPos(e.clientX - rect.left);
                   setHoverSeekTime(pos * duration);
                 }}
                 onMouseLeave={() => setHoverSeekTime(null)}
                 onClick={(e) => {
                   const rect = e.currentTarget.getBoundingClientRect();
-                  const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+                  const pos = Math.max(
+                    0,
+                    Math.min(1, (e.clientX - rect.left) / rect.width),
+                  );
                   seekTo(pos * duration);
                 }}
               >
@@ -434,15 +576,18 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
 
               {/* Controls Action Row */}
               <div className="flex items-center justify-between text-white text-xs">
-                
                 {/* Left controls: Play, Rewind, Fast Forward, Time, Volume */}
                 <div className="flex items-center gap-3">
                   <button
                     onClick={togglePlay}
                     className="p-1.5 rounded-lg hover:bg-white/10 text-white transition-colors"
-                    title={isPlaying ? 'Pause (Space / K)' : 'Play (Space / K)'}
+                    title={isPlaying ? "Pause (Space / K)" : "Play (Space / K)"}
                   >
-                    {isPlaying ? <Pause className="w-5 h-5 fill-current" /> : <Play className="w-5 h-5 fill-current" />}
+                    {isPlaying ? (
+                      <Pause className="w-5 h-5 fill-current" />
+                    ) : (
+                      <Play className="w-5 h-5 fill-current" />
+                    )}
                   </button>
 
                   <button
@@ -470,9 +615,13 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                         if (videoRef.current) videoRef.current.muted = newMute;
                       }}
                       className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
-                      title={isMuted ? 'Unmute (M)' : 'Mute (M)'}
+                      title={isMuted ? "Unmute (M)" : "Mute (M)"}
                     >
-                      {isMuted || volume === 0 ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4" />}
+                      {isMuted || volume === 0 ? (
+                        <VolumeX className="w-4 h-4 text-rose-400" />
+                      ) : (
+                        <Volume2 className="w-4 h-4" />
+                      )}
                     </button>
                     <input
                       type="range"
@@ -497,38 +646,146 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                   <div className="font-mono text-[11px] text-slate-300 ml-1">
                     <span>{formatTime(currentTime)}</span>
                     <span className="text-slate-500 mx-1">/</span>
-                    <span className="text-slate-400">{formatTime(duration)}</span>
+                    <span className="text-slate-400">
+                      {formatTime(duration)}
+                    </span>
                   </div>
                 </div>
 
                 {/* Right controls: Captions, Speed, Theater, Fullscreen */}
                 <div className="flex items-center gap-2 relative">
-                  
+                  {/* Captions Toggle */}
+                  <button
+                    onClick={() => setShowCaptions(!showCaptions)}
+                    className={`p-1.5 rounded-lg transition-colors ${
+                      showCaptions
+                        ? "text-indigo-400 bg-indigo-500/20"
+                        : "text-slate-400 hover:text-white hover:bg-white/10"
+                    }`}
+                    title="Toggle Subtitles (C)"
+                  >
+                    <Subtitles className="w-4 h-4" />
+                  </button>
+
+                  {/* Speed Selector */}
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowSpeedMenu(!showSpeedMenu)}
+                      className="px-2 py-1 rounded-lg text-[11px] font-semibold text-slate-300 hover:text-white hover:bg-white/10"
+                      title="Playback Speed"
+                    >
+                      {playbackRate}x
+                    </button>
+
+                    {showSpeedMenu && (
+                      <div className="absolute bottom-8 right-0 bg-slate-900 border border-slate-700 rounded-xl py-1 shadow-2xl z-30 min-w-[90px]">
+                        {[0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((speed) => (
+                          <button
+                            key={speed}
+                            onClick={() => {
+                              setPlaybackRate(speed);
+                              if (videoRef.current)
+                                videoRef.current.playbackRate = speed;
+                              setShowSpeedMenu(false);
+                            }}
+                            className={`w-full px-3 py-1 text-left text-xs hover:bg-slate-800 ${
+                              playbackRate === speed
+                                ? "text-indigo-400 font-bold"
+                                : "text-slate-300"
+                            }`}
+                          >
+                            {speed}x
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Theater Mode */}
+                  <button
+                    onClick={() => setIsTheater(!isTheater)}
+                    className={`p-1.5 rounded-lg transition-colors hidden md:block ${
+                      isTheater
+                        ? "text-indigo-400 bg-indigo-500/20"
+                        : "text-slate-400 hover:text-white hover:bg-white/10"
+                    }`}
+                    title="Toggle Theater Mode"
+                  >
+                    <Monitor className="w-4 h-4" />
+                  </button>
+
                   {/* Fullscreen Toggle */}
                   <button
                     onClick={handleToggleFullscreen}
                     className="p-1.5 rounded-lg hover:bg-white/10 text-slate-300 hover:text-white transition-colors"
                     title="Toggle Fullscreen (F)"
                   >
-                    {isFullscreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
+                    {isFullscreen ? (
+                      <Minimize className="w-4 h-4" />
+                    ) : (
+                      <Maximize className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Quick Note Inserter Bar under Video */}
+          <div className="p-4 bg-slate-900/60 border-t border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-semibold text-slate-300 flex items-center gap-1">
+                <Bookmark className="w-3.5 h-3.5 text-indigo-400" />
+                Quick Note at{" "}
+                <span className="font-mono text-indigo-300">
+                  {formatTime(currentTime)}
+                </span>
+                :
+              </span>
+            </div>
+
+            <form
+              onSubmit={handleAddNote}
+              className="flex-1 flex items-center gap-2"
+            >
+              <input
+                type="text"
+                value={newNoteText}
+                onChange={(e) => setNewNoteText(e.target.value)}
+                placeholder="Jot down a concept or insight..."
+                className="flex-1 px-3 py-1.5 rounded-lg bg-slate-950 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+              />
+              <button
+                type="submit"
+                disabled={!newNoteText.trim()}
+                className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold disabled:opacity-40 transition-colors shrink-0"
+              >
+                Save Note
+              </button>
+            </form>
+          </div>
+
           {/* Lesson Overview & Key Points */}
           <div className="p-6 space-y-4">
             <div>
-              <h3 className="text-base font-bold text-white mb-1">About This Lesson</h3>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">{activeLesson.summary}</p>
+              <h3 className="text-base font-bold text-white mb-1">
+                About This Lesson
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                {activeLesson.summary}
+              </p>
             </div>
 
             <div>
-              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Key Takeaways</h4>
+              <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
+                Key Takeaways
+              </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                 {activeLesson.keyPoints.map((point, i) => (
-                  <div key={i} className="flex items-start gap-2 text-xs text-slate-300 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/80">
+                  <div
+                    key={i}
+                    className="flex items-start gap-2 text-xs text-slate-300 bg-slate-900/40 p-2.5 rounded-lg border border-slate-800/80"
+                  >
                     <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
                     <span>{point}</span>
                   </div>
@@ -539,16 +796,17 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
         </div>
 
         {/* Right Side: Interactive Classroom Drawer (Transcript, Notes, Syllabus, Resources) */}
-        <div className={`${isTheater ? 'lg:col-span-12' : 'lg:col-span-4'} flex flex-col bg-slate-900/50 h-[650px] lg:h-auto border-t lg:border-t-0 border-slate-800`}>
-          
+        <div
+          className={`${isTheater ? "lg:col-span-12" : "lg:col-span-4"} flex flex-col bg-slate-900/50 h-[650px] lg:h-auto border-t lg:border-t-0 border-slate-800`}
+        >
           {/* Tabs Header */}
           <div className="flex items-center border-b border-slate-800 bg-slate-900 px-2 pt-2 gap-1 overflow-x-auto no-scrollbar">
             <button
-              onClick={() => setActiveTab('transcript')}
+              onClick={() => setActiveTab("transcript")}
               className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
-                activeTab === 'transcript'
-                  ? 'bg-slate-950 text-indigo-400 border-t-2 border-indigo-500'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                activeTab === "transcript"
+                  ? "bg-slate-950 text-indigo-400 border-t-2 border-indigo-500"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
@@ -558,10 +816,50 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
               </span>
             </button>
 
+            <button
+              onClick={() => setActiveTab("notes")}
+              className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                activeTab === "notes"
+                  ? "bg-slate-950 text-indigo-400 border-t-2 border-indigo-500"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+              }`}
+            >
+              <Bookmark className="w-3.5 h-3.5" />
+              My Notes
+              {lessonNotes.length > 0 && (
+                <span className="text-[10px] px-1 rounded bg-indigo-500/20 text-indigo-300 font-bold">
+                  {lessonNotes.length}
+                </span>
+              )}
+            </button>
+
+            <button
+              onClick={() => setActiveTab("syllabus")}
+              className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                activeTab === "syllabus"
+                  ? "bg-slate-950 text-indigo-400 border-t-2 border-indigo-500"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+              }`}
+            >
+              <ListOrdered className="w-3.5 h-3.5" />
+              Course Syllabus
+            </button>
+
+            <button
+              onClick={() => setActiveTab("resources")}
+              className={`px-3 py-2 text-xs font-semibold rounded-t-lg transition-all flex items-center gap-1.5 whitespace-nowrap ${
+                activeTab === "resources"
+                  ? "bg-slate-950 text-indigo-400 border-t-2 border-indigo-500"
+                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+              }`}
+            >
+              <Download className="w-3.5 h-3.5" />
+              Resources
+            </button>
           </div>
 
           {/* TAB 1: TRANSCRIPT */}
-          {activeTab === 'transcript' && (
+          {activeTab === "transcript" && (
             <div className="flex-1 flex flex-col p-4 overflow-hidden">
               {/* Search & Auto-scroll toggle */}
               <div className="flex items-center gap-2 mb-3">
@@ -579,12 +877,12 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                   onClick={() => setAutoScrollTranscript(!autoScrollTranscript)}
                   className={`px-2 py-1.5 rounded-lg text-[10px] font-semibold transition-all whitespace-nowrap ${
                     autoScrollTranscript
-                      ? 'bg-indigo-600/30 text-indigo-300 border border-indigo-500/40'
-                      : 'bg-slate-800 text-slate-400'
+                      ? "bg-indigo-600/30 text-indigo-300 border border-indigo-500/40"
+                      : "bg-slate-800 text-slate-400"
                   }`}
                   title="Toggle automatic tracking scroll"
                 >
-                  Auto-scroll: {autoScrollTranscript ? 'ON' : 'OFF'}
+                  Auto-scroll: {autoScrollTranscript ? "ON" : "OFF"}
                 </button>
               </div>
 
@@ -594,7 +892,8 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                 className="flex-1 overflow-y-auto space-y-2 pr-1"
               >
                 {filteredTranscript.map((line) => {
-                  const isActive = currentTime >= line.start && currentTime <= line.end;
+                  const isActive =
+                    currentTime >= line.start && currentTime <= line.end;
 
                   return (
                     <div
@@ -603,8 +902,8 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                       onClick={() => seekTo(line.start)}
                       className={`p-2.5 rounded-xl text-xs cursor-pointer transition-all border ${
                         isActive
-                          ? 'bg-indigo-600/20 border-indigo-500/60 shadow-lg text-white font-medium scale-[1.01]'
-                          : 'bg-slate-900/60 border-slate-800/80 text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                          ? "bg-indigo-600/20 border-indigo-500/60 shadow-lg text-white font-medium scale-[1.01]"
+                          : "bg-slate-900/60 border-slate-800/80 text-slate-300 hover:bg-slate-800/80 hover:text-white"
                       }`}
                     >
                       <div className="flex items-center justify-between gap-2 mb-1">
@@ -625,10 +924,241 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
             </div>
           )}
 
+          {/* TAB 2: TIMESTAMPED NOTES */}
+          {activeTab === "notes" && (
+            <div className="flex-1 flex flex-col p-4 overflow-hidden">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-white">
+                  Your Notes for this Lesson
+                </span>
+                {lessonNotes.length > 0 && (
+                  <button
+                    onClick={handleExportNotes}
+                    className="flex items-center gap-1 text-[11px] text-indigo-400 hover:text-indigo-300 font-semibold"
+                  >
+                    <Download className="w-3 h-3" />
+                    Export (.md)
+                  </button>
+                )}
+              </div>
 
+              {lessonNotes.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center text-center p-6 text-slate-400">
+                  <Bookmark className="w-8 h-8 text-slate-600 mb-2" />
+                  <p className="text-xs font-semibold text-slate-300 mb-1">
+                    No notes yet
+                  </p>
+                  <p className="text-[11px] text-slate-500 max-w-xs">
+                    Type in the note box below the video to bookmark important
+                    concepts with exact video timestamps!
+                  </p>
+                </div>
+              ) : (
+                <div className="flex-1 overflow-y-auto space-y-2 pr-1">
+                  {lessonNotes.map((note) => (
+                    <div
+                      key={note.id}
+                      className="p-3 rounded-xl bg-slate-900 border border-slate-800 text-xs space-y-1.5"
+                    >
+                      <div className="flex items-center justify-between">
+                        <button
+                          onClick={() => seekTo(note.timestamp)}
+                          className="font-mono text-[10px] font-bold text-indigo-400 hover:text-indigo-300 px-1.5 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 flex items-center gap-1"
+                          title="Seek video to this moment"
+                        >
+                          <Play className="w-2.5 h-2.5 fill-current" />
+                          {note.formattedTime}
+                        </button>
+                        <button
+                          onClick={() => deleteNote(note.id)}
+                          className="text-slate-500 hover:text-rose-400 p-1 rounded"
+                          title="Delete note"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                      <p className="text-slate-200 whitespace-pre-wrap leading-relaxed">
+                        {note.content}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: SYLLABUS SIDEBAR */}
+          {activeTab === "syllabus" && (
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+              {activeCourse.modules.map((mod, modIdx) => (
+                <div key={mod.id} className="space-y-1.5">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 flex items-center justify-between">
+                    <span>Module {modIdx + 1}</span>
+                    <span className="font-normal text-[10px]">
+                      {mod.lessons.length} Lessons
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    {mod.lessons.map((lesson) => {
+                      const isCurrent = lesson.id === activeLesson.id;
+                      const isCompleted =
+                        !!userProgress.completedLessons[lesson.id];
+
+                      return (
+                        <div
+                          key={lesson.id}
+                          onClick={() =>
+                            navigateToLesson(activeCourse.id, lesson.id)
+                          }
+                          className={`p-2.5 rounded-xl text-xs flex items-center justify-between gap-2 cursor-pointer transition-all ${
+                            isCurrent
+                              ? "bg-indigo-600/30 border border-indigo-500/50 text-white font-semibold"
+                              : "bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-800"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2 truncate">
+                            {isCompleted ? (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            ) : (
+                              <Play className="w-3 h-3 text-slate-500 shrink-0 fill-current" />
+                            )}
+                            <span className="truncate">{lesson.title}</span>
+                          </div>
+                          <span className="font-mono text-[10px] text-slate-500 shrink-0">
+                            {Math.floor(lesson.duration / 60)}m
+                          </span>
+                        </div>
+                      );
+                    })}
+
+                    {/* Quiz Button */}
+                    {mod.quiz && (
+                      <div
+                        onClick={() => onOpenQuiz(mod.quiz!)}
+                        className="p-2.5 rounded-xl bg-indigo-950/40 border border-indigo-800/50 hover:bg-indigo-900/50 cursor-pointer flex items-center justify-between text-xs text-indigo-300 font-semibold"
+                      >
+                        <div className="flex items-center gap-2">
+                          <HelpCircle className="w-3.5 h-3.5 text-indigo-400" />
+                          <span>{mod.quiz.title}</span>
+                        </div>
+                        <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-600 text-white">
+                          Quiz
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* TAB 4: RESOURCES */}
+          {activeTab === "resources" && (
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              <h4 className="text-xs font-bold text-white mb-2">
+                Downloadable Materials
+              </h4>
+              {activeLesson.resources.length === 0 ? (
+                <p className="text-xs text-slate-500">
+                  No external resources attached to this lesson.
+                </p>
+              ) : (
+                activeLesson.resources.map((res) => (
+                  <a
+                    key={res.id}
+                    href={res.url}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      alert(`Initiating download for: ${res.title}`);
+                    }}
+                    className="p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 flex items-center justify-between text-xs text-slate-300 transition-colors group"
+                  >
+                    <div className="flex items-center gap-2.5 truncate">
+                      <Download className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
+                      <div className="truncate">
+                        <p className="font-semibold text-white truncate">
+                          {res.title}
+                        </p>
+                        <p className="text-[10px] text-slate-500 uppercase">
+                          {res.type} {res.size ? `• ${res.size}` : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
+                  </a>
+                ))
+              )}
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Keyboard Shortcuts Help Modal */}
+      {showShortcutsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm animate-in fade-in">
+          <div className="w-full max-w-sm bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                <Keyboard className="w-4 h-4 text-indigo-400" />
+                Player Keyboard Shortcuts
+              </h3>
+              <button
+                onClick={() => setShowShortcutsModal(false)}
+                className="text-slate-400 hover:text-white text-xs"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-2.5 text-xs text-slate-300">
+              <div className="flex justify-between items-center py-1 border-b border-slate-800">
+                <span>Play / Pause</span>
+                <span className="font-mono px-2 py-0.5 rounded bg-slate-800 text-indigo-300 font-bold">
+                  Space / K
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-slate-800">
+                <span>Rewind 10 Seconds</span>
+                <span className="font-mono px-2 py-0.5 rounded bg-slate-800 text-indigo-300 font-bold">
+                  J / Left
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-slate-800">
+                <span>Forward 10 Seconds</span>
+                <span className="font-mono px-2 py-0.5 rounded bg-slate-800 text-indigo-300 font-bold">
+                  L / Right
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-slate-800">
+                <span>Mute / Unmute</span>
+                <span className="font-mono px-2 py-0.5 rounded bg-slate-800 text-indigo-300 font-bold">
+                  M
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-slate-800">
+                <span>Toggle Fullscreen</span>
+                <span className="font-mono px-2 py-0.5 rounded bg-slate-800 text-indigo-300 font-bold">
+                  F
+                </span>
+              </div>
+              <div className="flex justify-between items-center py-1 border-b border-slate-800">
+                <span>Toggle Subtitles</span>
+                <span className="font-mono px-2 py-0.5 rounded bg-slate-800 text-indigo-300 font-bold">
+                  C
+                </span>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowShortcutsModal(false)}
+              className="w-full mt-5 py-2 rounded-lg bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-500"
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

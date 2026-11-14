@@ -1,47 +1,55 @@
-import React, { useState } from 'react';
-import { LearningProvider, useLearning } from './context/LearningContext';
-import { Navbar } from './components/Navbar';
-import { CatalogView } from './components/CatalogView';
-import { CourseDetailView } from './components/CourseDetailView';
-import { PlayerView } from './components/PlayerView';
-import { Quiz } from './types';
-import { BookOpen, ShieldCheck, Heart, Sparkles, Terminal } from 'lucide-react';
+import React, { useState } from "react";
+import { LearningProvider, useLearning } from "./context/LearningContext";
+import { Navbar } from "./components/Navbar";
+import { CatalogView } from "./components/CatalogView";
+import { CourseDetailView } from "./components/CourseDetailView";
+import { PlayerView } from "./components/PlayerView";
+import { QuizEngine } from "./components/QuizEngine";
+import { Quiz } from "./types";
+import { BookOpen, ShieldCheck, Heart, Sparkles, Terminal } from "lucide-react";
 
-type AppView = 'catalog' | 'course-detail' | 'player' | 'dashboard' | 'certificate';
+type AppView =
+  | "catalog"
+  | "course-detail"
+  | "player"
+  | "dashboard"
+  | "certificate";
 
 function MainApp() {
-  const { 
-    selectedCourseId, 
-    navigateToCourse, 
-    navigateToLesson, 
-    activeQuiz, 
-    openQuiz, 
-    closeQuiz 
+  const {
+    selectedCourseId,
+    navigateToCourse,
+    navigateToLesson,
+    activeQuiz,
+    openQuiz,
+    closeQuiz,
   } = useLearning();
 
-  const [currentView, setCurrentView] = useState<AppView>('catalog');
-  const [detailCourseId, setDetailCourseId] = useState<string>(selectedCourseId || 'course-react-fullstack');
+  const [currentView, setCurrentView] = useState<AppView>("catalog");
+  const [detailCourseId, setDetailCourseId] = useState<string>(
+    selectedCourseId || "course-react-fullstack",
+  );
 
   // Handle selecting a course from catalog
   const handleSelectCourse = (courseId: string) => {
     setDetailCourseId(courseId);
     navigateToCourse(courseId);
-    setCurrentView('course-detail');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setCurrentView("course-detail");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Handle starting a lesson from detail page
   const handleStartLesson = (courseId: string, lessonId: string) => {
     navigateToLesson(courseId, lessonId);
-    setCurrentView('player');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setCurrentView("player");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Handle viewing certificate
   const handleViewCertificate = (courseId: string) => {
     setDetailCourseId(courseId);
-    setCurrentView('certificate');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    setCurrentView("certificate");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   return (
@@ -51,34 +59,34 @@ function MainApp() {
 
       {/* Main View Switcher */}
       <main className="flex-1">
-        {currentView === 'catalog' && (
+        {currentView === "catalog" && (
           <CatalogView onSelectCourse={handleSelectCourse} />
         )}
 
-        {currentView === 'course-detail' && (
+        {currentView === "course-detail" && (
           <CourseDetailView
             courseId={detailCourseId}
-            onBack={() => setCurrentView('catalog')}
+            onBack={() => setCurrentView("catalog")}
             onStartLesson={handleStartLesson}
             onOpenQuiz={(quiz: Quiz) => openQuiz(quiz)}
             onViewCertificate={handleViewCertificate}
           />
         )}
 
-        {currentView === 'player' && (
+        {currentView === "player" && (
           <PlayerView
-            onBackToCourse={() => setCurrentView('course-detail')}
+            onBackToCourse={() => setCurrentView("course-detail")}
             onOpenQuiz={(quiz: Quiz) => openQuiz(quiz)}
           />
         )}
 
-        {currentView === 'dashboard' && (
+        {currentView === "dashboard" && (
           <div className="max-w-3xl mx-auto p-16 text-center text-slate-400">
             🚧 Dashboard view — Day 11 mein banega
           </div>
         )}
 
-        {currentView === 'certificate' && (
+        {currentView === "certificate" && (
           <div className="max-w-3xl mx-auto p-16 text-center text-slate-400">
             🚧 Certificate view — Day 12 mein banega
           </div>
@@ -86,6 +94,16 @@ function MainApp() {
       </main>
 
       {/* Global Interactive Quiz Modal */}
+      {activeQuiz && (
+        <QuizEngine
+          quiz={activeQuiz}
+          onClose={closeQuiz}
+          onViewCertificate={(courseId) => {
+            closeQuiz();
+            handleViewCertificate(courseId);
+          }}
+        />
+      )}
 
       {/* Footer (Hidden when printing certificates) */}
       <footer className="no-print border-t border-slate-900 bg-slate-950 py-10 px-4 sm:px-6 lg:px-8 text-xs text-slate-500">
@@ -94,7 +112,9 @@ function MainApp() {
             <div className="w-6 h-6 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold text-xs">
               g
             </div>
-            <span className="font-bold text-white tracking-tight">glynac e-learn</span>
+            <span className="font-bold text-white tracking-tight">
+              glynac e-learn
+            </span>
             <span className="text-slate-600">|</span>
             <span>Engineering Mastery & Interactive Learning Platform</span>
           </div>
