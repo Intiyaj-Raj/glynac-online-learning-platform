@@ -1,22 +1,22 @@
-import React, { useState } from 'react';
-import { 
-  ArrowLeft, 
-  Play, 
-  CheckCircle2, 
-  Clock, 
-  Star, 
-  Users, 
-  Award, 
-  ChevronDown, 
-  ChevronUp, 
-  HelpCircle, 
-  FileText, 
-  ShieldCheck, 
+import React, { useState } from "react";
+import {
+  ArrowLeft,
+  Play,
+  CheckCircle2,
+  Clock,
+  Star,
+  Users,
+  Award,
+  ChevronDown,
+  ChevronUp,
+  HelpCircle,
+  FileText,
+  ShieldCheck,
   Sparkles,
-  BookOpen
-} from 'lucide-react';
-import { Course, Lesson, Quiz } from '../types';
-import { useLearning } from '../context/LearningContext';
+  BookOpen,
+} from "lucide-react";
+import { Course, Lesson, Quiz } from "../types";
+import { useLearning } from "../context/LearningContext";
 
 interface CourseDetailViewProps {
   courseId: string;
@@ -31,19 +31,24 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
   onBack,
   onStartLesson,
   onOpenQuiz,
-  onViewCertificate
+  onViewCertificate,
 }) => {
-  const { courses, userProgress, getCourseProgress, getLessonProgress } = useLearning();
-  const course = courses.find(c => c.id === courseId);
+  const { courses, userProgress, getCourseProgress, getLessonProgress } =
+    useLearning();
+  const course = courses.find((c) => c.id === courseId);
 
   // Accordion state (open all modules by default)
-  const [openModules, setOpenModules] = useState<Record<string, boolean>>(() => {
-    const init: Record<string, boolean> = {};
-    if (course) {
-      course.modules.forEach(m => { init[m.id] = true; });
-    }
-    return init;
-  });
+  const [openModules, setOpenModules] = useState<Record<string, boolean>>(
+    () => {
+      const init: Record<string, boolean> = {};
+      if (course) {
+        course.modules.forEach((m) => {
+          init[m.id] = true;
+        });
+      }
+      return init;
+    },
+  );
 
   if (!course) {
     return (
@@ -60,9 +65,9 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
   }
 
   const toggleModule = (modId: string) => {
-    setOpenModules(prev => ({
+    setOpenModules((prev) => ({
       ...prev,
-      [modId]: !prev[modId]
+      [modId]: !prev[modId],
     }));
   };
 
@@ -78,7 +83,11 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
         break;
       }
     }
-    if (firstActionLessonId && !userProgress.completedLessons[firstActionLessonId]) break;
+    if (
+      firstActionLessonId &&
+      !userProgress.completedLessons[firstActionLessonId]
+    )
+      break;
   }
 
   return (
@@ -102,19 +111,23 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
                 <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                   {course.category}
                 </span>
-                <span className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
-                  course.level === 'Beginner'
-                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                    : course.level === 'Intermediate'
-                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                    : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
-                }`}>
+                <span
+                  className={`px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider ${
+                    course.level === "Beginner"
+                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                      : course.level === "Intermediate"
+                        ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
+                        : "bg-rose-500/20 text-rose-300 border border-rose-500/30"
+                  }`}
+                >
                   {course.level} Level
                 </span>
                 <div className="flex items-center gap-1 text-xs text-amber-400 bg-slate-900 px-2 py-1 rounded-md border border-slate-800">
                   <Star className="w-3.5 h-3.5 fill-current" />
                   <span className="font-bold text-white">{course.rating}</span>
-                  <span className="text-slate-400">({course.reviewsCount} reviews)</span>
+                  <span className="text-slate-400">
+                    ({course.reviewsCount} reviews)
+                  </span>
                 </div>
               </div>
 
@@ -134,7 +147,9 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Users className="w-4 h-4 text-indigo-400" />
-                  <span>{course.studentsEnrolled.toLocaleString()} Active Learners</span>
+                  <span>
+                    {course.studentsEnrolled.toLocaleString()} Active Learners
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Award className="w-4 h-4 text-amber-400" />
@@ -153,7 +168,10 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
                 />
                 <div className="absolute inset-0 bg-slate-950/40 flex items-center justify-center">
                   <button
-                    onClick={() => firstActionLessonId && onStartLesson(course.id, firstActionLessonId)}
+                    onClick={() =>
+                      firstActionLessonId &&
+                      onStartLesson(course.id, firstActionLessonId)
+                    }
                     className="w-14 h-14 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-xl shadow-indigo-600/50 hover:scale-105 transition-all"
                   >
                     <Play className="w-6 h-6 fill-current ml-1" />
@@ -164,19 +182,26 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
               {/* Progress Bar & Status */}
               <div>
                 <div className="flex justify-between items-center text-xs mb-1.5">
-                  <span className="text-slate-400 font-medium">Your Course Progress</span>
-                  <span className="text-indigo-400 font-bold">{courseProgress.percentage}%</span>
+                  <span className="text-slate-400 font-medium">
+                    Your Course Progress
+                  </span>
+                  <span className="text-indigo-400 font-bold">
+                    {courseProgress.percentage}%
+                  </span>
                 </div>
                 <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
                   <div
                     className={`h-full transition-all duration-500 ${
-                      courseProgress.isCourseCompleted ? 'bg-emerald-500' : 'bg-indigo-500'
+                      courseProgress.isCourseCompleted
+                        ? "bg-emerald-500"
+                        : "bg-indigo-500"
                     }`}
                     style={{ width: `${courseProgress.percentage}%` }}
                   />
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  {courseProgress.completedLessonsCount} of {courseProgress.totalLessonsCount} lessons finished
+                  {courseProgress.completedLessonsCount} of{" "}
+                  {courseProgress.totalLessonsCount} lessons finished
                 </p>
               </div>
 
@@ -191,18 +216,25 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
                 </button>
               ) : (
                 <button
-                  onClick={() => firstActionLessonId && onStartLesson(course.id, firstActionLessonId)}
+                  onClick={() =>
+                    firstActionLessonId &&
+                    onStartLesson(course.id, firstActionLessonId)
+                  }
                   className="w-full py-3 px-4 rounded-xl font-bold text-xs uppercase tracking-wider bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition-all"
                 >
                   <Play className="w-4 h-4 fill-current" />
-                  {courseProgress.percentage > 0 ? 'Resume Course Lesson' : 'Start Course Now'}
+                  {courseProgress.percentage > 0
+                    ? "Resume Course Lesson"
+                    : "Start Course Now"}
                 </button>
               )}
 
               <div className="text-[11px] text-slate-400 space-y-1.5 pt-2 border-t border-slate-800">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Full Lifetime Access & Instant Offline Progress Sync</span>
+                  <span>
+                    Full Lifetime Access & Instant Offline Progress Sync
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
@@ -217,10 +249,8 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
       {/* Main Body: Syllabus & Instructor */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          
           {/* Left 2 Cols: Syllabus Accordion & Learning Outcomes */}
           <div className="lg:col-span-2 space-y-8">
-            
             {/* Learning Outcomes */}
             <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
               <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
@@ -229,7 +259,10 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {course.learningOutcomes.map((outcome, idx) => (
-                  <div key={idx} className="flex items-start gap-2.5 text-xs text-slate-300">
+                  <div
+                    key={idx}
+                    className="flex items-start gap-2.5 text-xs text-slate-300"
+                  >
                     <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                     <span>{outcome}</span>
                   </div>
@@ -245,15 +278,20 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
                   Comprehensive Syllabus
                 </h2>
                 <span className="text-xs text-slate-400">
-                  {course.modules.length} Modules • {courseProgress.totalLessonsCount} Lessons
+                  {course.modules.length} Modules •{" "}
+                  {courseProgress.totalLessonsCount} Lessons
                 </span>
               </div>
 
               <div className="space-y-4">
                 {course.modules.map((mod, modIdx) => {
                   const isOpen = !!openModules[mod.id];
-                  const completedInMod = mod.lessons.filter(l => userProgress.completedLessons[l.id]).length;
-                  const quizAttempt = mod.quiz ? userProgress.quizAttempts[mod.quiz.id]?.[0] : null;
+                  const completedInMod = mod.lessons.filter(
+                    (l) => userProgress.completedLessons[l.id],
+                  ).length;
+                  const quizAttempt = mod.quiz
+                    ? userProgress.quizAttempts[mod.quiz.id]?.[0]
+                    : null;
 
                   return (
                     <div
@@ -270,19 +308,25 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
                             <span>Module {modIdx + 1}</span>
                             <span>•</span>
                             <span className="text-slate-400">
-                              {completedInMod}/{mod.lessons.length} Lessons Finished
+                              {completedInMod}/{mod.lessons.length} Lessons
+                              Finished
                             </span>
                           </div>
-                          <h3 className="text-sm sm:text-base font-bold text-white">{mod.title}</h3>
-                          <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">{mod.description}</p>
+                          <h3 className="text-sm sm:text-base font-bold text-white">
+                            {mod.title}
+                          </h3>
+                          <p className="text-xs text-slate-400 mt-0.5 line-clamp-1">
+                            {mod.description}
+                          </p>
                         </div>
 
                         <div className="flex items-center gap-3 shrink-0">
-                          {completedInMod === mod.lessons.length && mod.lessons.length > 0 && (
-                            <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
-                              ✓
-                            </span>
-                          )}
+                          {completedInMod === mod.lessons.length &&
+                            mod.lessons.length > 0 && (
+                              <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs">
+                                ✓
+                              </span>
+                            )}
                           {isOpen ? (
                             <ChevronUp className="w-5 h-5 text-slate-400" />
                           ) : (
@@ -295,22 +339,30 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
                       {isOpen && (
                         <div className="border-t border-slate-800/80 divide-y divide-slate-800/60 bg-slate-950/40">
                           {mod.lessons.map((lesson) => {
-                            const isCompleted = !!userProgress.completedLessons[lesson.id];
-                            const watchProgress = getLessonProgress(lesson.id, lesson.duration);
+                            const isCompleted =
+                              !!userProgress.completedLessons[lesson.id];
+                            const watchProgress = getLessonProgress(
+                              lesson.id,
+                              lesson.duration,
+                            );
                             const mins = Math.floor(lesson.duration / 60);
 
                             return (
                               <div
                                 key={lesson.id}
-                                onClick={() => onStartLesson(course.id, lesson.id)}
+                                onClick={() =>
+                                  onStartLesson(course.id, lesson.id)
+                                }
                                 className="px-5 py-3.5 flex items-center justify-between hover:bg-slate-800/40 cursor-pointer transition-colors group"
                               >
                                 <div className="flex items-center gap-3.5 min-w-0">
-                                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
-                                    isCompleted
-                                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
-                                      : 'bg-slate-800 text-slate-400 group-hover:bg-indigo-600 group-hover:text-white'
-                                  }`}>
+                                  <div
+                                    className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors ${
+                                      isCompleted
+                                        ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                                        : "bg-slate-800 text-slate-400 group-hover:bg-indigo-600 group-hover:text-white"
+                                    }`}
+                                  >
                                     {isCompleted ? (
                                       <CheckCircle2 className="w-4 h-4" />
                                     ) : (
@@ -321,7 +373,9 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
                                     <h4 className="text-xs sm:text-sm font-semibold text-slate-200 group-hover:text-indigo-300 truncate">
                                       {lesson.title}
                                     </h4>
-                                    <p className="text-[11px] text-slate-500 truncate">{lesson.summary}</p>
+                                    <p className="text-[11px] text-slate-500 truncate">
+                                      {lesson.summary}
+                                    </p>
                                   </div>
                                 </div>
 
@@ -330,11 +384,12 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
                                     <Clock className="w-3 h-3 text-slate-500" />
                                     {mins}m
                                   </span>
-                                  {watchProgress.percentage > 0 && !isCompleted && (
-                                    <span className="text-[10px] text-indigo-400 font-medium hidden sm:inline">
-                                      {watchProgress.percentage}% watched
-                                    </span>
-                                  )}
+                                  {watchProgress.percentage > 0 &&
+                                    !isCompleted && (
+                                      <span className="text-[10px] text-indigo-400 font-medium hidden sm:inline">
+                                        {watchProgress.percentage}% watched
+                                      </span>
+                                    )}
                                 </div>
                               </div>
                             );
@@ -357,7 +412,9 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
                                     </span>
                                   </div>
                                   <p className="text-[11px] text-slate-400 truncate">
-                                    {mod.quiz.questions.length} Questions (MCQ, Multi-Select & Reorder) • Pass requirement: {mod.quiz.passingScorePercent}%
+                                    {mod.quiz.questions.length} Questions (MCQ,
+                                    Multi-Select & Reorder) • Pass requirement:{" "}
+                                    {mod.quiz.passingScorePercent}%
                                   </p>
                                 </div>
                               </div>
@@ -366,11 +423,13 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
                                 onClick={() => onOpenQuiz(mod.quiz!)}
                                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                                   quizAttempt?.passed
-                                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30'
-                                    : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20'
+                                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/30"
+                                    : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/20"
                                 }`}
                               >
-                                {quizAttempt?.passed ? `Passed (${quizAttempt.scorePercent}%)` : 'Start Quiz'}
+                                {quizAttempt?.passed
+                                  ? `Passed (${quizAttempt.scorePercent}%)`
+                                  : "Start Quiz"}
                               </button>
                             </div>
                           )}
@@ -384,7 +443,9 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
 
             {/* Prerequisites */}
             <div className="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
-              <h3 className="text-base font-bold text-white mb-3">Course Prerequisites</h3>
+              <h3 className="text-base font-bold text-white mb-3">
+                Course Prerequisites
+              </h3>
               <ul className="space-y-2 text-xs text-slate-400">
                 {course.prerequisites.map((prereq, index) => (
                   <li key={index} className="flex items-start gap-2">
@@ -399,8 +460,10 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
           {/* Right Col: Instructor Profile */}
           <div className="space-y-6">
             <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl sticky top-20">
-              <h3 className="text-xs uppercase font-bold tracking-wider text-slate-400 mb-4">Your Instructor</h3>
-              
+              <h3 className="text-xs uppercase font-bold tracking-wider text-slate-400 mb-4">
+                Your Instructor
+              </h3>
+
               <div className="flex items-center gap-4 mb-4">
                 <img
                   src={course.instructor.avatar}
@@ -408,8 +471,12 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
                   className="w-16 h-16 rounded-2xl object-cover border-2 border-indigo-500/40 shadow-md"
                 />
                 <div>
-                  <h4 className="text-base font-bold text-white">{course.instructor.name}</h4>
-                  <p className="text-xs text-indigo-400 font-medium leading-snug">{course.instructor.title}</p>
+                  <h4 className="text-base font-bold text-white">
+                    {course.instructor.name}
+                  </h4>
+                  <p className="text-xs text-indigo-400 font-medium leading-snug">
+                    {course.instructor.title}
+                  </p>
                 </div>
               </div>
 
@@ -419,15 +486,23 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
 
               <div className="grid grid-cols-3 gap-2 py-3 border-y border-slate-800 text-center text-xs">
                 <div>
-                  <p className="font-extrabold text-white text-sm">{course.instructor.rating}</p>
-                  <p className="text-[10px] text-slate-400">Instructor Rating</p>
+                  <p className="font-extrabold text-white text-sm">
+                    {course.instructor.rating}
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    Instructor Rating
+                  </p>
                 </div>
                 <div>
-                  <p className="font-extrabold text-white text-sm">{(course.instructor.studentsCount / 1000).toFixed(0)}k+</p>
+                  <p className="font-extrabold text-white text-sm">
+                    {(course.instructor.studentsCount / 1000).toFixed(0)}k+
+                  </p>
                   <p className="text-[10px] text-slate-400">Students</p>
                 </div>
                 <div>
-                  <p className="font-extrabold text-white text-sm">{course.instructor.coursesCount}</p>
+                  <p className="font-extrabold text-white text-sm">
+                    {course.instructor.coursesCount}
+                  </p>
                   <p className="text-[10px] text-slate-400">Courses</p>
                 </div>
               </div>
@@ -435,9 +510,12 @@ export const CourseDetailView: React.FC<CourseDetailViewProps> = ({
               {/* Certificate Guarantee Box */}
               <div className="mt-5 p-4 rounded-xl bg-gradient-to-br from-indigo-950/40 to-slate-900 border border-indigo-900/40 text-center">
                 <Award className="w-8 h-8 text-amber-400 mx-auto mb-2" />
-                <h5 className="text-xs font-bold text-white mb-1">Earn Your Accredited Credential</h5>
+                <h5 className="text-xs font-bold text-white mb-1">
+                  Earn Your Accredited Credential
+                </h5>
                 <p className="text-[11px] text-slate-400 mb-3">
-                  Complete all modules and achieve ≥ 70% in every quiz to claim your personalized printable certificate.
+                  Complete all modules and achieve ≥ 70% in every quiz to claim
+                  your personalized printable certificate.
                 </p>
                 {courseProgress.isCourseCompleted ? (
                   <button

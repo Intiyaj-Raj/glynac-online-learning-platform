@@ -3,6 +3,7 @@ import { LearningProvider, useLearning } from './context/LearningContext';
 import { Navbar } from './components/Navbar';
 import { CatalogView } from './components/CatalogView';
 import { CourseDetailView } from './components/CourseDetailView';
+import { PlayerView } from './components/PlayerView';
 import { Quiz } from './types';
 import { BookOpen, ShieldCheck, Heart, Sparkles, Terminal } from 'lucide-react';
 
@@ -65,9 +66,10 @@ function MainApp() {
         )}
 
         {currentView === 'player' && (
-          <div className="max-w-3xl mx-auto p-16 text-center text-slate-400">
-            🚧 Lesson player — Day 7 mein banega
-          </div>
+          <PlayerView
+            onBackToCourse={() => setCurrentView('course-detail')}
+            onOpenQuiz={(quiz: Quiz) => openQuiz(quiz)}
+          />
         )}
 
         {currentView === 'dashboard' && (
