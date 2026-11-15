@@ -4,6 +4,8 @@ import { Navbar } from "./components/Navbar";
 import { CatalogView } from "./components/CatalogView";
 import { CourseDetailView } from "./components/CourseDetailView";
 import { PlayerView } from "./components/PlayerView";
+import { DashboardView } from "./components/DashboardView";
+import { CertificateView } from "./components/CertificateView";
 import { QuizEngine } from "./components/QuizEngine";
 import { Quiz } from "./types";
 import { BookOpen, ShieldCheck, Heart, Sparkles, Terminal } from "lucide-react";
@@ -81,15 +83,18 @@ function MainApp() {
         )}
 
         {currentView === "dashboard" && (
-          <div className="max-w-3xl mx-auto p-16 text-center text-slate-400">
-            🚧 Dashboard view — Day 11 mein banega
-          </div>
+          <DashboardView
+            onSelectCourse={handleSelectCourse}
+            onResumeLesson={handleStartLesson}
+            onViewCertificates={() => setCurrentView("certificate")}
+          />
         )}
 
         {currentView === "certificate" && (
-          <div className="max-w-3xl mx-auto p-16 text-center text-slate-400">
-            🚧 Certificate view — Day 12 mein banega
-          </div>
+          <CertificateView
+            onBack={() => setCurrentView("catalog")}
+            selectedCourseId={detailCourseId}
+          />
         )}
       </main>
 
