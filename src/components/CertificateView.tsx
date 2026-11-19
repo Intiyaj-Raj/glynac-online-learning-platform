@@ -1,35 +1,41 @@
-import React, { useState } from 'react';
-import { 
-  Award, 
-  Printer, 
-  Share2, 
-  CheckCircle, 
-  ShieldCheck, 
-  Calendar, 
-  Clock, 
-  ArrowLeft, 
+import React, { useState } from "react";
+import {
+  Award,
+  Printer,
+  Share2,
+  CheckCircle,
+  ShieldCheck,
+  Calendar,
+  Clock,
+  ArrowLeft,
   QrCode,
   Sparkles,
   Download,
-  Copy
-} from 'lucide-react';
-import { useLearning } from '../context/LearningContext';
-import { Certificate } from '../types';
+  Copy,
+} from "lucide-react";
+import { useLearning } from "../context/LearningContext";
+import { Certificate } from "../types";
 
 interface CertificateViewProps {
   onBack: () => void;
   selectedCourseId?: string;
 }
 
-export const CertificateView: React.FC<CertificateViewProps> = ({ onBack, selectedCourseId }) => {
-  const { userProgress, courses, issueCertificate, updateLearnerName } = useLearning();
+export const CertificateView: React.FC<CertificateViewProps> = ({
+  onBack,
+  selectedCourseId,
+}) => {
+  const { userProgress, courses, issueCertificate, updateLearnerName } =
+    useLearning();
 
   const [activeCertId, setActiveCertId] = useState<string>(() => {
     if (selectedCourseId) {
-      const match = userProgress.certificates.find(c => c.courseId === selectedCourseId);
+      const match = userProgress.certificates.find(
+        (c) => c.courseId === selectedCourseId,
+      );
       if (match) return match.id;
     }
-    return userProgress.certificates[0]?.id || '';
+    return userProgress.certificates[0]?.id || "";
   });
 
   const [copied, setCopied] = useState(false);
@@ -42,7 +48,9 @@ export const CertificateView: React.FC<CertificateViewProps> = ({ onBack, select
     setActiveCertId(newCert.id);
   };
 
-  const currentCert = userProgress.certificates.find(c => c.id === activeCertId) || userProgress.certificates[0];
+  const currentCert =
+    userProgress.certificates.find((c) => c.id === activeCertId) ||
+    userProgress.certificates[0];
 
   const handlePrint = () => {
     window.print();
@@ -62,7 +70,6 @@ export const CertificateView: React.FC<CertificateViewProps> = ({ onBack, select
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 pb-20">
-      
       {/* Top Controls Bar (Hidden in Print) */}
       <div className="no-print border-b border-slate-800 bg-slate-900/90 py-4 px-4 sm:px-6 lg:px-8 sticky top-16 z-30 backdrop-blur-md">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -83,7 +90,7 @@ export const CertificateView: React.FC<CertificateViewProps> = ({ onBack, select
                 aria-label="Select earned certificate"
                 className="bg-slate-950 border border-slate-700 text-xs text-white rounded-lg px-3 py-2 focus:outline-none focus:border-indigo-500"
               >
-                {userProgress.certificates.map(c => (
+                {userProgress.certificates.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.courseTitle.slice(0, 30)}...
                   </option>
@@ -95,8 +102,12 @@ export const CertificateView: React.FC<CertificateViewProps> = ({ onBack, select
               onClick={handleCopyLink}
               className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors border border-slate-700"
             >
-              {copied ? <CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              {copied ? 'Link Copied!' : 'Share Credential'}
+              {copied ? (
+                <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+              ) : (
+                <Copy className="w-3.5 h-3.5" />
+              )}
+              {copied ? "Link Copied!" : "Share Credential"}
             </button>
 
             <button
@@ -112,21 +123,23 @@ export const CertificateView: React.FC<CertificateViewProps> = ({ onBack, select
 
       {/* Main Certificate Display Area */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
-        
         {/* If no certificate earned yet */}
         {!currentCert ? (
           <div className="text-center py-20 bg-slate-900/60 border border-slate-800 rounded-3xl p-8 max-w-xl mx-auto shadow-2xl">
             <div className="w-16 h-16 rounded-2xl bg-amber-500/10 text-amber-400 flex items-center justify-center mx-auto mb-4 border border-amber-500/20">
               <Award className="w-8 h-8" />
             </div>
-            <h3 className="text-lg font-bold text-white mb-2">No Verified Certificates Yet</h3>
+            <h3 className="text-lg font-bold text-white mb-2">
+              No Verified Certificates Yet
+            </h3>
             <p className="text-xs text-slate-400 mb-6 leading-relaxed">
-              Complete any curriculum and achieve at least 70% in the module assessment quizzes to earn an accredited certificate.
+              Complete any curriculum and achieve at least 70% in the module
+              assessment quizzes to earn an accredited certificate.
             </p>
 
             <div className="space-y-3">
               <button
-                onClick={() => handleClaimSampleCert('course-react-fullstack')}
+                onClick={() => handleClaimSampleCert("course-react-fullstack")}
                 className="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition-all"
               >
                 <Sparkles className="w-4 h-4" />
@@ -143,17 +156,22 @@ export const CertificateView: React.FC<CertificateViewProps> = ({ onBack, select
         ) : (
           /* Real Printable Certificate Canvas Container */
           <div className="space-y-6">
-            
             {/* Quick Name Customization helper (Hidden in Print) */}
             <div className="no-print bg-slate-900 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
               <div className="flex items-center gap-2 text-slate-300">
                 <ShieldCheck className="w-4 h-4 text-emerald-400 shrink-0" />
                 <span>
-                  Certificate issued to: <strong className="text-white">{userProgress.learnerName}</strong>
+                  Certificate issued to:{" "}
+                  <strong className="text-white">
+                    {userProgress.learnerName}
+                  </strong>
                 </span>
               </div>
               {isEditingName ? (
-                <form onSubmit={handleSaveName} className="flex items-center gap-2">
+                <form
+                  onSubmit={handleSaveName}
+                  className="flex items-center gap-2"
+                >
                   <input
                     type="text"
                     value={editedName}
@@ -187,7 +205,6 @@ export const CertificateView: React.FC<CertificateViewProps> = ({ onBack, select
 
             {/* Official Certificate Box */}
             <div className="print-certificate-container bg-slate-900 border-8 border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl relative overflow-hidden text-slate-100">
-              
               {/* Outer Golden Certificate Border Pattern */}
               <div className="absolute inset-2 border-2 border-amber-500/30 rounded-2xl pointer-events-none" />
               <div className="absolute inset-3 border border-amber-500/10 rounded-xl pointer-events-none" />
@@ -222,23 +239,33 @@ export const CertificateView: React.FC<CertificateViewProps> = ({ onBack, select
               {/* Accomplishment Text */}
               <div className="text-center max-w-2xl mx-auto relative z-10 space-y-3 mb-10">
                 <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  has successfully demonstrated technical mastery, completed all curriculum modules, and passed comprehensive assessment examinations for:
+                  has successfully demonstrated technical mastery, completed all
+                  curriculum modules, and passed comprehensive assessment
+                  examinations for:
                 </p>
                 <h4 className="text-lg sm:text-2xl font-bold text-white text-indigo-300">
                   {currentCert.courseTitle}
                 </h4>
                 <p className="text-xs text-slate-400">
-                  Graduated with an examination grade of <strong className="text-emerald-400">{currentCert.scorePercent}%</strong> • Equivalent to {currentCert.totalHours} of rigorous engineering coursework.
+                  Graduated with an examination grade of{" "}
+                  <strong className="text-emerald-400">
+                    {currentCert.scorePercent}%
+                  </strong>{" "}
+                  • Equivalent to {currentCert.totalHours} of rigorous
+                  engineering coursework.
                 </p>
               </div>
 
               {/* Bottom Signatures & Verifications */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 items-end relative z-10 pt-8 border-t border-slate-800">
-                
                 {/* Left: Date & Credential ID */}
                 <div className="space-y-1 text-center sm:text-left">
-                  <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Date of Issuance</p>
-                  <p className="text-xs font-semibold text-white">{currentCert.issueDate}</p>
+                  <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                    Date of Issuance
+                  </p>
+                  <p className="text-xs font-semibold text-white">
+                    {currentCert.issueDate}
+                  </p>
                   <p className="text-[10px] text-slate-500 font-mono mt-2">
                     ID: {currentCert.credentialId}
                   </p>
@@ -264,15 +291,23 @@ export const CertificateView: React.FC<CertificateViewProps> = ({ onBack, select
                     </span>
                   </div>
                   <div className="w-40 sm:ml-auto h-0.5 bg-slate-700 mx-auto" />
-                  <p className="text-xs font-bold text-white pt-1">{currentCert.instructorName}</p>
-                  <p className="text-[10px] text-slate-400">{currentCert.instructorTitle}</p>
+                  <p className="text-xs font-bold text-white pt-1">
+                    {currentCert.instructorName}
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    {currentCert.instructorTitle}
+                  </p>
                 </div>
               </div>
 
               {/* Footer Verification Link */}
               <div className="mt-8 pt-4 border-t border-slate-800/60 text-center text-[10px] text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
-                <span>Verified by glynac e-learn Academy Accreditation Engine</span>
-                <span className="font-mono text-slate-400">https://glynac-elearn.io/verify/{currentCert.credentialId}</span>
+                <span>
+                  Verified by glynac e-learn Academy Accreditation Engine
+                </span>
+                <span className="font-mono text-slate-400">
+                  https://glynac-elearn.io/verify/{currentCert.credentialId}
+                </span>
               </div>
             </div>
           </div>

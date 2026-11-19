@@ -75,6 +75,8 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
   const [hoverSeekTime, setHoverSeekTime] = useState<number | null>(null);
   const [hoverSeekPos, setHoverSeekPos] = useState<number>(0);
   const [videoError, setVideoError] = useState<boolean>(false);
+  const [selectedResource, setSelectedResource] = useState<any>(null);
+  const [toastMessage, setToastMessage] = useState<string>("");
 
   // Classroom Sidebar Tabs: 'transcript' | 'notes' | 'syllabus' | 'resources'
   const [activeTab, setActiveTab] = useState<
@@ -256,8 +258,15 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
     const el = document.getElementById(
       `transcript-line-${activeTranscriptLine.id}`,
     );
-    if (el) {
-      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    if (el && transcriptContainerRef.current) {
+      const container = transcriptContainerRef.current;
+      const targetTop =
+        container.scrollTop +
+        el.getBoundingClientRect().top -
+        container.getBoundingClientRect().top -
+        container.clientHeight / 2 +
+        el.clientHeight / 2;
+      container.scrollTo({ top: targetTop, behavior: "smooth" });
     }
   }, [activeTranscriptLine?.id, autoScrollTranscript]);
 
@@ -276,7 +285,8 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
       (n) => n.lessonId === activeLesson.id,
     );
     if (lessonNotes.length === 0) {
-      alert("No notes taken for this lesson yet.");
+      setToastMessage("Add a lesson note before exporting.");
+      window.setTimeout(() => setToastMessage(""), 2800);
       return;
     }
 
@@ -334,6 +344,15 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
+      {toastMessage && (
+        <div
+          role="status"
+          className="fixed top-20 right-5 z-[70] px-4 py-3 rounded-xl border border-indigo-500/40 bg-slate-900 text-sm text-white shadow-2xl animate-in slide-in-from-top-2"
+        >
+          <span className="text-indigo-300 mr-2">●</span>
+          {toastMessage}
+        </div>
+      )}
       {/* Top Classroom Bar */}
       <div className="border-b border-slate-800 bg-slate-900/90 px-4 py-3 flex items-center justify-between gap-4 sticky top-16 z-30 backdrop-blur-md">
         <div className="flex items-center gap-3 min-w-0">
@@ -1065,14 +1084,11 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                 </p>
               ) : (
                 activeLesson.resources.map((res) => (
-                  <a
+                  <button
                     key={res.id}
-                    href={res.url}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      alert(`Initiating download for: ${res.title}`);
-                    }}
-                    className="p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-slate-700 hover:bg-slate-800 flex items-center justify-between text-xs text-slate-300 transition-colors group"
+                    type="button"
+                    onClick={() => setSelectedResource(res)}
+                    className="w-full text-left p-3 rounded-xl bg-slate-900 border border-slate-800 hover:border-indigo-500/60 hover:bg-slate-800 flex items-center justify-between text-xs text-slate-300 transition-colors group"
                   >
                     <div className="flex items-center gap-2.5 truncate">
                       <Download className="w-4 h-4 text-indigo-400 group-hover:scale-110 transition-transform" />
@@ -1086,13 +1102,96 @@ export const PlayerView: React.FC<PlayerViewProps> = ({
                       </div>
                     </div>
                     <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-                  </a>
+                  </button>
                 ))
               )}
             </div>
           )}
         </div>
       </div>
+
+      {selectedResource && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-sm"
+          onClick={() => setSelectedResource(null)}
+        >
+          <div
+            className="w-full max-w-xl rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <span className="text-[10px] uppercase tracking-widest text-indigo-300 font-bold">
+                  Learning resource
+                </span>
+                <h3 className="text-lg font-bold text-white mt-1">
+                  {selectedResource.title}
+                </h3>
+                <p className="text-xs text-slate-400 mt-1">
+                  {selectedResource.type.toUpperCase()}{" "}
+                  {selectedResource.size ? `• ${selectedResource.size}` : ""}
+                </p>
+              </div>
+              <button
+                onClick={() => setSelectedResource(null)}
+                className="text-slate-400 hover:text-white"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="mt-5 rounded-xl bg-slate-950 border border-slate-800 p-4 text-sm text-slate-300 leading-relaxed">
+              <p className="font-semibold text-white mb-2">Preview</p>
+              <p>
+                {selectedResource.url && selectedResource.url !== "#"
+                  ? "This resource is hosted externally. Use the button below to open the original file."
+                  : `This ${selectedResource.type} resource is provided as a course handout. It includes the lesson title, key learning points, and a short study checklist for ${activeLesson.title}.`}
+              </p>
+              <ul className="list-disc pl-5 mt-3 space-y-1">
+                {activeLesson.keyPoints.slice(0, 4).map((point: string) => (
+                  <li key={point}>{point}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex justify-end gap-2 mt-5">
+              <button
+                onClick={() => setSelectedResource(null)}
+                className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 text-xs font-semibold"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  if (selectedResource.url && selectedResource.url !== "#") {
+                    window.open(
+                      selectedResource.url,
+                      "_blank",
+                      "noopener,noreferrer",
+                    );
+                  } else {
+                    const content = `# ${selectedResource.title}\n\nCourse: ${activeCourse.title}\nLesson: ${activeLesson.title}\n\n## Key learning points\n${activeLesson.keyPoints.map((point: string) => `- ${point}`).join("\n")}\n\n## Lesson summary\n${activeLesson.summary}\n`;
+                    const blob = new Blob([content], {
+                      type: "text/markdown;charset=utf-8",
+                    });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement("a");
+                    a.href = url;
+                    a.download = `${selectedResource.title.replace(/[^a-z0-9]+/gi, "-").toLowerCase()}.md`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                  }
+                  setSelectedResource(null);
+                }}
+                className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold"
+              >
+                <Download className="inline w-3.5 h-3.5 mr-1" />{" "}
+                {selectedResource.url && selectedResource.url !== "#"
+                  ? "Open resource"
+                  : "Generate & download"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Keyboard Shortcuts Help Modal */}
       {showShortcutsModal && (

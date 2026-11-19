@@ -96,8 +96,8 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({
       return userAns === q.correctAnswer;
     }
     if (q.type === "multi-select") {
-      const correctArr = (q.correctAnswer as string[]).sort();
-      const userArr = ((userAns as string[]) || []).sort();
+      const correctArr = [...(q.correctAnswer as string[])].sort();
+      const userArr = [...((userAns as string[]) || [])].sort();
       if (correctArr.length !== userArr.length) return false;
       return correctArr.every((val, i) => val === userArr[i]);
     }
@@ -221,15 +221,74 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({
               {completedAttempt.correctCount}/{completedAttempt.totalQuestions}{" "}
               correct
             </p>
-            <p className="text-xs text-slate-500">
-              Detailed breakdown, review &amp; retake Day 10 mein add hoga.
-            </p>
-            <button
-              onClick={onClose}
-              className="px-5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white"
-            >
-              Close
-            </button>
+            <div className="text-left space-y-3 mt-6">
+              {quiz.questions.map((q, index) => {
+                const userAnswer = completedAttempt.userAnswers[q.id];
+                const correct = isQuestionCorrect(q, userAnswer);
+                const labels = (ids: string | string[] | undefined) => {
+                  const values = Array.isArray(ids) ? ids : ids ? [ids] : [];
+                  return values.map(
+                    (id) =>
+                      q.options.find((option) => option.id === id)?.label || id,
+                  );
+                };
+                return (
+                  <div
+                    key={q.id}
+                    className="p-4 rounded-xl border border-slate-800 bg-slate-950/70"
+                  >
+                    <div className="flex items-center justify-between gap-3 mb-2">
+                      <p className="text-xs font-bold text-white">
+                        Q{index + 1}. {q.question}
+                      </p>
+                      <span
+                        className={`text-[10px] font-bold ${correct ? "text-emerald-400" : "text-rose-400"}`}
+                      >
+                        {correct ? "Correct" : "Incorrect"}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400">
+                      Your answer:{" "}
+                      {labels(userAnswer).join(" • ") || "Not answered"}
+                    </p>
+                    {!correct && (
+                      <p className="text-[11px] text-emerald-300 mt-1">
+                        Correct answer: {labels(q.correctAnswer).join(" • ")}
+                      </p>
+                    )}
+                    <p className="text-xs text-slate-300 mt-2 leading-relaxed">
+                      {q.explanation}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="flex justify-center gap-3 pt-3">
+              <button
+                onClick={() => {
+                  setCurrentQuestionIdx(0);
+                  setAnswers({});
+                  setTimeRemaining(quiz.timeLimitSeconds);
+                  setIsSubmitted(false);
+                  setCompletedAttempt(null);
+                  const reset: Record<string, string[]> = {};
+                  quiz.questions.forEach((q) => {
+                    if (q.type === "drag-order")
+                      reset[q.id] = q.options.map((o) => o.id);
+                  });
+                  setOrderState(reset);
+                }}
+                className="px-5 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white"
+              >
+                <RotateCcw className="w-3.5 h-3.5 inline mr-1" /> Retake Quiz
+              </button>
+              <button
+                onClick={onClose}
+                className="px-5 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-white"
+              >
+                Close
+              </button>
+            </div>
           </div>
         ) : (
           /* ============================================================== */
@@ -313,10 +372,111 @@ export const QuizEngine: React.FC<QuizEngineProps> = ({
                 </div>
               )}
 
-              {currentQuestion.type !== "multiple-choice" && (
-                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-400">
-                  Is question type (multi-select / drag-order) ka UI Day 10 mein
-                  banega. Abhi &quot;Next Question&quot; dabake aage badho.
+              {currentQuestion.type === "multi-select" && (
+                <div className="space-y-2">
+                  {currentQuestion.options.map((opt) => {
+                    const selected = (
+                      (answers[currentQuestion.id] as string[]) || []
+                    ).includes(opt.id);
+                    return (
+                      <label
+                        key={opt.id}
+                        className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-all ${selected ? "bg-indigo-600/20 border-indigo-500 text-white" : "bg-slate-950/70 border-slate-800 text-slate-300 hover:border-slate-600"}`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={(e) =>
+                            setAnswers((prev) => {
+                              const current =
+                                (prev[currentQuestion.id] as string[]) || [];
+                              return {
+                                ...prev,
+                                [currentQuestion.id]: e.target.checked
+                                  ? [...current, opt.id]
+                                  : current.filter((id) => id !== opt.id),
+                              };
+                            })
+                          }
+                          className="accent-indigo-500 w-4 h-4"
+                        />
+                        <span className="text-sm">{opt.label}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+              {currentQuestion.type === "drag-order" && (
+                <div className="space-y-2">
+                  <p className="text-xs text-slate-400">
+                    Use the arrows to arrange these steps in the correct order.
+                  </p>
+                  {(
+                    orderState[currentQuestion.id] ||
+                    currentQuestion.options.map((o) => o.id)
+                  ).map((id, index, list) => {
+                    const option = currentQuestion.options.find(
+                      (o) => o.id === id,
+                    )!;
+                    const move = (direction: number) =>
+                      setOrderState((prev) => {
+                        const next = [...list];
+                        const target = index + direction;
+                        if (target < 0 || target >= next.length) return prev;
+                        [next[index], next[target]] = [
+                          next[target],
+                          next[index],
+                        ];
+                        return { ...prev, [currentQuestion.id]: next };
+                      });
+                    return (
+                      <div
+                        key={id}
+                        className="flex items-center gap-3 p-3 rounded-xl bg-slate-950 border border-slate-800"
+                      >
+                        <span className="text-xs font-mono text-indigo-300 w-6">
+                          {index + 1}
+                        </span>
+                        <span className="text-sm text-slate-200 flex-1">
+                          {option.label}
+                        </span>
+                        <button
+                          aria-label="Move up"
+                          disabled={index === 0}
+                          onClick={() => move(-1)}
+                          className="p-2 rounded-lg bg-slate-800 disabled:opacity-30"
+                        >
+                          <ArrowUp className="w-4 h-4" />
+                        </button>
+                        <button
+                          aria-label="Move down"
+                          disabled={index === list.length - 1}
+                          onClick={() => move(1)}
+                          className="p-2 rounded-lg bg-slate-800 disabled:opacity-30"
+                        >
+                          <ArrowDown className="w-4 h-4" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {instantFeedbackMode && answers[currentQuestion.id] && (
+                <div
+                  className={`p-3 rounded-xl border text-xs ${isQuestionCorrect(currentQuestion, answers[currentQuestion.id]) ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-200" : "bg-amber-500/10 border-amber-500/30 text-amber-100"}`}
+                >
+                  <p className="font-bold mb-1">
+                    {isQuestionCorrect(
+                      currentQuestion,
+                      answers[currentQuestion.id],
+                    )
+                      ? "Correct answer"
+                      : "Keep thinking"}
+                  </p>
+                  <p className="leading-relaxed">
+                    {currentQuestion.explanation}
+                  </p>
                 </div>
               )}
 

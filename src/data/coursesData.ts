@@ -713,6 +713,7 @@ export const INITIAL_COURSES: Course[] = [
     reviewsCount: 980,
     studentsEnrolled: 12100,
     badgeName: "Cloud Commander",
+    featured: false,
     instructor: {
       id: "inst-3",
       name: "Elena Rostova",
@@ -898,6 +899,7 @@ export const INITIAL_COURSES: Course[] = [
     reviewsCount: 1650,
     studentsEnrolled: 15700,
     badgeName: "Design Systems Pioneer",
+    featured: false,
     instructor: {
       id: "inst-4",
       name: "Chloe Monet",
@@ -1071,6 +1073,7 @@ export const INITIAL_COURSES: Course[] = [
     reviewsCount: 1100,
     studentsEnrolled: 9400,
     badgeName: "Security Sentinel",
+    featured: false,
     instructor: {
       id: "inst-5",
       name: "Kavita Sundaram",
